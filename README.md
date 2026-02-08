@@ -5,9 +5,9 @@
 
 # rec
 
-Record, replay, and export terminal sessions.
+A CLI tool to record, replay, and export terminal sessions.
 
-`rec` captures every command you run in a shell session, then lets you replay them with safety controls or export them to scripts, CI/CD configs, and documentation -- turning your terminal workflow into reusable artifacts.
+`rec` captures every command you run in a shell session, then lets you replay them with safety controls or export them to scripts, CI/CD configs, and documentation - turning your terminal workflow into reusable artifacts.
 
 ## Quick Install
 
