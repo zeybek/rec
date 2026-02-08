@@ -1,0 +1,19 @@
+# Cocogitto configuration
+# https://docs.cocogitto.io/reference/config
+
+# Ignore merge commits when checking history
+ignore_merge_commits = true
+
+# Git hooks
+[git_hooks.pre-commit]
+script = """#!/bin/sh
+set -e
+cargo fmt
+git add -u
+"""
+
+[git_hooks.commit-msg]
+script = """#!/bin/sh
+set -e
+cog verify --file $1
+"""

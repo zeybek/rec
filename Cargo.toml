@@ -1,0 +1,91 @@
+[package]
+name = "rec-cli"
+version = "0.0.1"
+edition = "2024"
+rust-version = "1.85"
+description = "CLI Terminal Recorder - record, replay, and export terminal sessions"
+license = "MIT"
+repository = "https://github.com/zeybek/rec"
+homepage = "https://github.com/zeybek/rec"
+readme = "README.md"
+keywords = ["terminal", "recording", "replay", "export", "cli"]
+categories = ["command-line-utilities", "development-tools"]
+authors = ["Ahmet Zeybek"]
+exclude = [".github/", ".claude/", "tests/", "deny.toml", "rustfmt.toml", "rust-toolchain.toml", ".editorconfig", ".gitignore", "AGENTS.md"]
+
+[[bin]]
+name = "rec"
+path = "src/main.rs"
+
+[lib]
+name = "rec"
+path = "src/lib.rs"
+
+[dependencies]
+# CLI
+clap = { version = "4.5", features = ["derive"] }
+clap_complete = "4.5"
+
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+
+# Error Handling
+thiserror = "2.0"
+
+# Date/Time
+chrono = { version = "0.4", default-features = false, features = ["clock", "serde", "std"] }
+
+# Directories
+directories = "6.0"
+
+# File Locking
+fd-lock = "4.0"
+
+# Utilities
+uuid = { version = "1.0", features = ["v4", "serde"] }
+
+# Fuzzy matching
+strsim = "0.11"
+
+# Replay
+dialoguer = "0.12"
+ctrlc = "3.5"
+glob = "0.3"
+regex = "1.12"
+similar = "2.7"
+toml_edit = "0.22"
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
+[package.metadata.binstall]
+pkg-url = "{ repo }/releases/download/{ version }/rec-cli-{ version }-{ target }{ archive-suffix }"
+bin-dir = "rec-cli-{ version }-{ target }/{ bin }{ binary-ext }"
+pkg-fmt = "tgz"
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1
+panic = "abort"
+
+[lints.rust]
+unsafe_code = "deny"
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+module_name_repetitions = "allow"
+must_use_candidate = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+struct_excessive_bools = "allow"
+doc_markdown = "allow"
+
+[dev-dependencies]
+tempfile = "3.24"
+assert_cmd = "2.0"
+predicates = "3.1"
+assert_fs = "1.1"

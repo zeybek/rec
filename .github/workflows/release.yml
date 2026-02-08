@@ -1,0 +1,156 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify version matches Cargo.toml
+        run: |
+          CARGO_VERSION=$(grep '^version' Cargo.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')
+          if [ "$CARGO_VERSION" != "${{ github.ref_name }}" ]; then
+            echo "::error::Tag ${{ github.ref_name }} does not match Cargo.toml version $CARGO_VERSION"
+            exit 1
+          fi
+
+      - name: Extract changelog for this version
+        id: changelog
+        run: |
+          VERSION="${{ github.ref_name }}"
+          # Extract section for this version from CHANGELOG.md
+          awk '/^## \['"$VERSION"'\]/{flag=1; next} /^## \[/{flag=0} flag' CHANGELOG.md > release_notes.md
+          if [ ! -s release_notes.md ]; then
+            echo "No changelog entry found for $VERSION, using default message"
+            echo "Release $VERSION" > release_notes.md
+          fi
+
+      - name: Create GitHub release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create "${{ github.ref_name }}" --draft --verify-tag --title "v${{ github.ref_name }}" --notes-file release_notes.md
+
+  build-release:
+    name: Build ${{ matrix.target }}
+    needs: [create-release]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-musl
+            os: ubuntu-latest
+            use-cross: true
+          - target: aarch64-unknown-linux-musl
+            os: ubuntu-latest
+            use-cross: true
+          - target: x86_64-apple-darwin
+            os: macos-13
+            use-cross: false
+          - target: aarch64-apple-darwin
+            os: macos-latest
+            use-cross: false
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            use-cross: false
+    env:
+      CARGO: cargo
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+
+      - name: Install cross
+        if: matrix.use-cross
+        run: |
+          cargo install cross --locked
+          echo "CARGO=cross" >> "$GITHUB_ENV"
+
+      - name: Build release binary
+        run: ${{ env.CARGO }} build --release --locked --target ${{ matrix.target }}
+
+      - name: Build archive (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          VERSION="${{ needs.create-release.outputs.version }}"
+          ARCHIVE="rec-cli-${VERSION}-${{ matrix.target }}"
+          mkdir -p "$ARCHIVE"
+          cp "target/${{ matrix.target }}/release/rec" "$ARCHIVE/"
+          cp README.md LICENSE "$ARCHIVE/"
+          tar czf "$ARCHIVE.tar.gz" "$ARCHIVE"
+          echo "ASSET=$ARCHIVE.tar.gz" >> "$GITHUB_ENV"
+
+      - name: Build archive (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          VERSION="${{ needs.create-release.outputs.version }}"
+          ARCHIVE="rec-cli-${VERSION}-${{ matrix.target }}"
+          mkdir -p "$ARCHIVE"
+          cp "target/${{ matrix.target }}/release/rec.exe" "$ARCHIVE/"
+          cp README.md LICENSE "$ARCHIVE/"
+          7z a "$ARCHIVE.zip" "$ARCHIVE"
+          echo "ASSET=$ARCHIVE.zip" >> "$GITHUB_ENV"
+
+      - name: Upload release archive
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: gh release upload "${{ needs.create-release.outputs.version }}" "${{ env.ASSET }}"
+
+  checksums:
+    name: Generate Checksums
+    needs: [create-release, build-release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all release assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release download "${{ needs.create-release.outputs.version }}" --dir assets/ --repo "${{ github.repository }}"
+
+      - name: Generate checksums
+        run: |
+          cd assets/
+          sha256sum * > checksums.txt
+          cat checksums.txt
+
+      - name: Upload checksums
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ needs.create-release.outputs.version }}" assets/checksums.txt --repo "${{ github.repository }}"
+
+  publish-release:
+    name: Publish Release
+    needs: [create-release, build-release, checksums]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mark release as published
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release edit "${{ needs.create-release.outputs.version }}" --draft=false --repo "${{ github.repository }}"
