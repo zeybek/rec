@@ -15,7 +15,7 @@ A CLI tool to record, replay, and export terminal sessions.
 cargo install rec-cli
 ```
 
-Pre-built binaries are available for Linux (x86_64, aarch64), macOS (x86_64, Apple Silicon), and Windows (x86_64) on the [releases page](https://github.com/zeybek/rec/releases/latest).
+Pre-built binaries are available for Linux (x86_64, aarch64) and macOS (x86_64, Apple Silicon) on the [releases page](https://github.com/zeybek/rec/releases/latest).
 
 ## Quick Start
 
