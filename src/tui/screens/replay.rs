@@ -122,7 +122,7 @@ impl ReplayScreen {
             completed as f64 / total as f64
         };
 
-        let label = format!("{}/{} commands", completed, total);
+        let label = format!("{completed}/{total} commands");
 
         let gauge = Gauge::default()
             .block(Block::default().borders(Borders::ALL).title("Progress"))

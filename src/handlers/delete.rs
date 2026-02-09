@@ -25,17 +25,14 @@ pub fn handle_delete(
     }
 
     // Require session identifier if not --all
-    let identifier = match identifier {
-        Some(id) => id,
-        None => {
-            ctx.output.error(
-                "Missing session",
-                "Provide a session name/ID or use --all to delete all sessions",
-                None,
-                Some("Usage: rec delete <SESSION> or rec delete --all"),
-            );
-            return ExitCode::from(EXIT_USER_ERROR);
-        }
+    let Some(identifier) = identifier else {
+        ctx.output.error(
+            "Missing session",
+            "Provide a session name/ID or use --all to delete all sessions",
+            None,
+            Some("Usage: rec delete <SESSION> or rec delete --all"),
+        );
+        return ExitCode::from(EXIT_USER_ERROR);
     };
 
     let session = match resolve_session_with_alias(&store, &alias_store, identifier, interactive) {
@@ -151,11 +148,7 @@ fn handle_delete_all(
     // Filter out active session
     let deletable: Vec<_> = session_ids
         .iter()
-        .filter(|id| {
-            active_session_id
-                .as_ref()
-                .map_or(true, |active_id| *id != active_id)
-        })
+        .filter(|id| active_session_id.as_ref() != Some(*id))
         .collect();
 
     let skipped = session_ids.len() - deletable.len();
@@ -225,17 +218,15 @@ fn handle_delete_all(
         print_json(&json);
     } else if failed_count > 0 {
         ctx.output.warning(&format!(
-            "Deleted {} sessions, {} failed, {} skipped",
-            deleted_count, failed_count, skipped
+            "Deleted {deleted_count} sessions, {failed_count} failed, {skipped} skipped"
         ));
     } else if skipped > 0 {
         ctx.output.success(&format!(
-            "Deleted {} sessions ({} active session skipped)",
-            deleted_count, skipped
+            "Deleted {deleted_count} sessions ({skipped} active session skipped)"
         ));
     } else {
         ctx.output
-            .success(&format!("Deleted all {} sessions", deleted_count));
+            .success(&format!("Deleted all {deleted_count} sessions"));
     }
 
     ExitCode::SUCCESS

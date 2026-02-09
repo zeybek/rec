@@ -112,10 +112,10 @@ pub fn render_status_bar(frame: &mut Frame, area: Rect, hints: &[(&str, &str)]) 
         .flat_map(|(i, (key, desc))| {
             let mut v = vec![
                 Span::styled(
-                    format!(" {} ", key),
+                    format!(" {key} "),
                     Style::default().fg(Color::Black).bg(Color::Gray),
                 ),
-                Span::raw(format!(" {} ", desc)),
+                Span::raw(format!(" {desc} ")),
             ];
             if i < hints.len() - 1 {
                 v.push(Span::raw(" "));

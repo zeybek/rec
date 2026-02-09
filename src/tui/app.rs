@@ -91,6 +91,9 @@ pub struct App {
 
 impl App {
     /// Create a new App instance.
+    ///
+    /// # Errors
+    /// Returns an error if the session store cannot be initialized.
     pub fn new(paths: &Paths) -> Result<Self> {
         let store = SessionStore::new(paths.clone());
         let sessions = Self::load_sessions(&store);
@@ -111,7 +114,7 @@ impl App {
         })
     }
 
-    /// Load sessions from store into SessionInfo structs.
+    /// Load sessions from store into `SessionInfo` structs.
     fn load_sessions(store: &SessionStore) -> Vec<SessionInfo> {
         let session_ids = store.list().unwrap_or_default();
         let mut sessions = Vec::new();
@@ -156,6 +159,7 @@ impl App {
     }
 
     /// Get the filtered sessions based on current filter.
+    #[must_use]
     pub fn filtered_sessions(&self) -> Vec<&SessionInfo> {
         if self.filter.is_empty() {
             self.sessions.iter().collect()
@@ -174,17 +178,22 @@ impl App {
     }
 
     /// Get currently selected session.
+    #[must_use]
     pub fn selected_session(&self) -> Option<&SessionInfo> {
         let filtered = self.filtered_sessions();
         filtered.get(self.selected).copied()
     }
 
     /// Load full session by ID.
+    #[must_use]
     pub fn load_session(&self, id: &str) -> Option<Session> {
         self.store.load(id).ok()
     }
 
     /// Delete a session by ID.
+    ///
+    /// # Errors
+    /// Returns an error if the session cannot be deleted.
     pub fn delete_session(&mut self, id: &str) -> Result<()> {
         self.store.delete(id)?;
         self.refresh_sessions();
@@ -192,6 +201,7 @@ impl App {
     }
 
     /// Check if we're in text input mode (filter or text field).
+    #[must_use]
     pub fn is_text_input_mode(&self) -> bool {
         // Filter mode on sessions screen
         if self.filter_mode {
@@ -234,11 +244,11 @@ impl App {
             ModalState::DeleteConfirm(id) => {
                 let id = id.clone();
                 match action {
-                    Action::Enter | Action::Char('y') | Action::Char('Y') => {
+                    Action::Enter | Action::Char('y' | 'Y') => {
                         let _ = self.delete_session(&id);
                         self.modal = ModalState::None;
                     }
-                    Action::Back | Action::Char('n') | Action::Char('N') => {
+                    Action::Back | Action::Char('n' | 'N') => {
                         self.modal = ModalState::None;
                     }
                     _ => {}
@@ -356,10 +366,7 @@ impl App {
                 if let Screen::Detail(id) = &self.screen {
                     let id = id.clone();
                     // Get command count from session
-                    let command_count = self
-                        .load_session(&id)
-                        .map(|s| s.commands.len())
-                        .unwrap_or(0);
+                    let command_count = self.load_session(&id).map_or(0, |s| s.commands.len());
                     self.replay_screen = ReplayScreen::new(&id, command_count);
                     self.screen = Screen::Replay(id);
                 }
@@ -452,6 +459,9 @@ fn restore_terminal(terminal: &mut Terminal<CrosstermBackend<Stdout>>) -> io::Re
 }
 
 /// Run the TUI application.
+///
+/// # Errors
+/// Returns an error if terminal setup fails or the application encounters an error.
 pub fn run(paths: &Paths) -> Result<()> {
     let mut terminal = setup_terminal().map_err(crate::error::RecError::Io)?;
     let mut app = App::new(paths)?;
@@ -472,7 +482,7 @@ fn run_app(terminal: &mut Terminal<CrosstermBackend<Stdout>>, app: &mut App) -> 
 
         // Poll for events
         if let Some(ev) = event::poll_event(Duration::from_millis(100)) {
-            let action = event::handle_event(ev, app.is_text_input_mode());
+            let action = event::handle_event(&ev, app.is_text_input_mode());
             app.handle_action(action);
         }
 

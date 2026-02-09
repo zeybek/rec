@@ -127,10 +127,10 @@ fn test_delete_all_removes_all_sessions() {
     assert!(env.store.exists(&id3), "session3 should exist");
 
     // Action: delete all via store API (simulating --all behavior)
-    let sessions = env.store.list().expect("list should succeed");
-    assert_eq!(sessions.len(), 3, "should have 3 sessions");
+    let session_ids = env.store.list().expect("list should succeed");
+    assert_eq!(session_ids.len(), 3, "should have 3 sessions");
 
-    for session_id in &sessions {
+    for session_id in &session_ids {
         env.store.delete(session_id).expect("delete should succeed");
     }
 

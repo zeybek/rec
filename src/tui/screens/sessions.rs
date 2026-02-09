@@ -8,14 +8,20 @@ use ratatui::{
 use crate::tui::app::App;
 use crate::tui::ui::render_status_bar;
 
+// Time constants for age formatting
+const MINUTE: u64 = 60;
+const HOUR: u64 = 60 * MINUTE;
+const DAY: u64 = 24 * HOUR;
+const WEEK: u64 = 7 * DAY;
+
 /// Sessions list screen - the main TUI view displaying all recording sessions.
 #[derive(Default)]
 pub struct SessionsScreen {
-    /// Table state for tracking selection (used with stateful widget)
+    /// Table state for tracking selection (used with `TableState`)
     #[allow(dead_code)]
     table_state: TableState,
     /// Row offset where table items start (for click detection)
-    /// This is: header_height + table_border + table_header = 3 + 1 + 1 = 5
+    /// This is: `header_height` + `table_border` + `table_header` = 3 + 1 + 1 = 5
     pub table_items_start_row: u16,
 }
 
@@ -201,11 +207,6 @@ fn format_age(timestamp: f64) -> String {
         .unwrap_or(0.0);
 
     let age_secs = (now - timestamp).max(0.0) as u64;
-
-    const MINUTE: u64 = 60;
-    const HOUR: u64 = 60 * MINUTE;
-    const DAY: u64 = 24 * HOUR;
-    const WEEK: u64 = 7 * DAY;
 
     if age_secs < MINUTE {
         String::from("now")

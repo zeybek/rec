@@ -68,10 +68,10 @@ pub fn poll_event(timeout: Duration) -> Option<Event> {
 
 /// Convert a crossterm event to an Action.
 /// `text_input_mode` should be true when in filter mode or text input fields.
-pub fn handle_event(event: Event, text_input_mode: bool) -> Action {
+pub fn handle_event(event: &Event, text_input_mode: bool) -> Action {
     match event {
-        Event::Key(key) => handle_key_event(key, text_input_mode),
-        Event::Mouse(mouse) => handle_mouse_event(mouse),
+        Event::Key(key) => handle_key_event(*key, text_input_mode),
+        Event::Mouse(mouse) => handle_mouse_event(*mouse),
         _ => Action::None,
     }
 }
@@ -95,18 +95,12 @@ fn handle_key_event(key: KeyEvent, text_input_mode: bool) -> Action {
     // Normal mode key handling
     match key.code {
         // Navigation - Arrow keys
-        KeyCode::Up => Action::Up,
-        KeyCode::Down => Action::Down,
-        KeyCode::Home => Action::First,
-        KeyCode::End => Action::Last,
+        KeyCode::Up | KeyCode::Char('k') => Action::Up,
+        KeyCode::Down | KeyCode::Char('j') => Action::Down,
+        KeyCode::Home | KeyCode::Char('g') => Action::First,
+        KeyCode::End | KeyCode::Char('G') => Action::Last,
         KeyCode::PageUp => Action::ScrollUp,
         KeyCode::PageDown => Action::ScrollDown,
-
-        // Navigation - Vim keys
-        KeyCode::Char('k') => Action::Up,
-        KeyCode::Char('j') => Action::Down,
-        KeyCode::Char('g') => Action::First,
-        KeyCode::Char('G') => Action::Last,
 
         // Actions
         KeyCode::Enter => Action::Enter,

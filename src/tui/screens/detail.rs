@@ -58,7 +58,7 @@ impl DetailScreen {
             ])
             .split(area);
 
-        self.render_header(frame, session, chunks[0]);
+        Self::render_header(frame, session, chunks[0]);
         self.render_commands(frame, session, chunks[1]);
         render_status_bar(
             frame,
@@ -73,7 +73,7 @@ impl DetailScreen {
         );
     }
 
-    fn render_header(&self, frame: &mut Frame, session: &Session, area: Rect) {
+    fn render_header(frame: &mut Frame, session: &Session, area: Rect) {
         let duration = session.footer.as_ref().map_or_else(
             || "-".to_string(),
             |f| {

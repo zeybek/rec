@@ -24,7 +24,7 @@ impl OutputViewer {
     /// * `scroll` - The current scroll offset (line index)
     /// * `title` - The title for the block
     pub fn render(frame: &mut Frame, area: Rect, lines: &[String], scroll: usize, title: &str) {
-        Self::render_with_options(frame, area, lines, scroll, title, false)
+        Self::render_with_options(frame, area, lines, scroll, title, false);
     }
 
     /// Render a scrollable output viewer with line numbers.
@@ -35,7 +35,7 @@ impl OutputViewer {
         scroll: usize,
         title: &str,
     ) {
-        Self::render_with_options(frame, area, lines, scroll, title, true)
+        Self::render_with_options(frame, area, lines, scroll, title, true);
     }
 
     /// Internal render function with all options.
