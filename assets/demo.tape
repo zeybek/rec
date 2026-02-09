@@ -1,103 +1,165 @@
-# VHS Demo Tape for rec
+# VHS Demo Tape for rec - Terminal Session Recorder
 # https://github.com/charmbracelet/vhs
 
 Output assets/demo.gif
 
 Set Shell zsh
 Set FontFamily "JetBrains Mono"
-Set FontSize 14
-Set Width 900
-Set Height 500
-Set Padding 20
+Set FontSize 13
+Set Width 1000
+Set Height 600
+Set Padding 15
 Set Theme "GruvboxDark"
-Set TypingSpeed 40ms
+Set TypingSpeed 70ms
 
-# Initialize rec hooks (hidden)
+# === SET CLEAN PROMPT ===
 Hide
-Type "source <(rec init zsh)"
+Type "PS1='%F{green}>%f '"
 Enter
-Sleep 500ms
+Type `eval "$(rec init zsh)"`
+Enter
+Sleep 0.5s
 Show
 
-# Title
-Type "# rec - Record, Replay, Export terminal sessions"
+# === INTRO ===
+Type "rec --help"
+Enter
+Sleep 4s
+Ctrl+L
+
+# === RECORDING A SESSION ===
+Type "rec start --name my-project"
+Enter
+Sleep 2s
+
+Type "echo 'Hello from rec!'"
 Enter
 Sleep 1.5s
-
-# Start recording
-Type "rec start --name my-session"
-Enter
-Sleep 1s
-
-# Simple commands that won't produce long output
-Type "echo 'Hello World'"
-Enter
-Sleep 800ms
 
 Type "whoami"
 Enter
-Sleep 800ms
-
-Type "date"
-Enter
-Sleep 800ms
+Sleep 1.5s
 
 Type "pwd"
 Enter
-Sleep 800ms
+Sleep 1.5s
 
-# Stop recording
+Type "ls -la"
+Enter
+Sleep 2s
+
 Type "rec stop"
 Enter
-Sleep 1.2s
+Sleep 3s
+Ctrl+L
 
-# List sessions
+# === LIST & SHOW ===
 Type "rec list"
 Enter
-Sleep 1.5s
+Sleep 3s
 
-# Show session details
-Type "rec show my-session"
+Type "rec show my-project"
+Enter
+Sleep 4s
+Ctrl+L
+
+# === TAGGING ===
+Type "rec tag my-project demo tutorial"
 Enter
 Sleep 2s
 
-# Export formats
-Type "# Export to various formats:"
+Type "rec tags"
 Enter
-Sleep 500ms
+Sleep 3s
+Ctrl+L
 
-Type "rec export my-session -f bash"
-Enter
-Sleep 2s
-
-Type "rec export my-session -f makefile"
-Enter
-Sleep 2s
-
-Type "rec export my-session -f github-action"
-Enter
-Sleep 2.5s
-
-# Replay
-Type "# Replay with safety checks:"
-Enter
-Sleep 500ms
-
-Type "rec replay my-session --dry-run"
-Enter
-Sleep 2s
-
-# Search
+# === SEARCH ===
 Type "rec search echo"
 Enter
-Sleep 1.5s
+Sleep 3s
+Ctrl+L
 
-# Cleanup
-Type "rec delete my-session --force"
+# === STATS ===
+Type "rec stats"
 Enter
-Sleep 1s
+Sleep 4s
+Ctrl+L
 
-# Final
-Type "# Install: cargo install rec-cli"
+# === EXPORT FORMATS ===
+Type "rec export my-project -f bash"
+Enter
+Sleep 4s
+Ctrl+L
+
+Type "rec export my-project -f makefile"
+Enter
+Sleep 4s
+Ctrl+L
+
+Type "rec export my-project -f github-action"
+Enter
+Sleep 4s
+Ctrl+L
+
+Type "rec export my-project -f dockerfile"
+Enter
+Sleep 4s
+Ctrl+L
+
+Type "rec export my-project -f markdown"
+Enter
+Sleep 4s
+Ctrl+L
+
+# === REPLAY ===
+Type "rec replay my-project --dry-run"
+Enter
+Sleep 4s
+Ctrl+L
+
+# === ALIAS ===
+Type "rec alias mp my-project"
 Enter
 Sleep 2s
+
+Type "rec show mp"
+Enter
+Sleep 3s
+Ctrl+L
+
+# === COPY & DIFF ===
+Type "rec copy my-project backup"
+Enter
+Sleep 2s
+
+Type "rec diff my-project backup"
+Enter
+Sleep 3s
+Ctrl+L
+
+# === DOCTOR ===
+Type "rec doctor"
+Enter
+Sleep 4s
+Ctrl+L
+
+# === CONFIG ===
+Type "rec config list"
+Enter
+Sleep 3s
+Ctrl+L
+
+# === SHELL INTEGRATION ===
+Type "rec init zsh | head -15"
+Enter
+Sleep 3s
+Ctrl+L
+
+# === FINAL ===
+Type "rec list"
+Enter
+Sleep 3s
+
+Type "echo 'cargo install rec-cli'"
+Enter
+Sleep 4s
