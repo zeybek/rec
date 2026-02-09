@@ -3,7 +3,7 @@
 
 Output assets/demo.gif
 
-Set Shell bash
+Set Shell zsh
 Set FontFamily "JetBrains Mono"
 Set FontSize 14
 Set Width 900
@@ -12,13 +12,20 @@ Set Padding 20
 Set Theme "GruvboxDark"
 Set TypingSpeed 40ms
 
+# Initialize rec hooks (hidden)
+Hide
+Type "source <(rec init zsh)"
+Enter
+Sleep 500ms
+Show
+
 # Title
 Type "# rec - Record, Replay, Export terminal sessions"
 Enter
 Sleep 1.5s
 
 # Start recording
-Type "rec start -n my-session"
+Type "rec start --name my-session"
 Enter
 Sleep 1s
 
