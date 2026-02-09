@@ -4,11 +4,12 @@
 Output assets/demo.gif
 
 Set Shell bash
+Set FontFamily "JetBrains Mono"
 Set FontSize 14
 Set Width 900
 Set Height 500
 Set Padding 20
-Set Theme "Catppuccin Mocha"
+Set Theme "GruvboxDark"
 Set TypingSpeed 40ms
 
 # Title
@@ -17,7 +18,7 @@ Enter
 Sleep 1.5s
 
 # Start recording
-Type "rec start my-session"
+Type "rec start -n my-session"
 Enter
 Sleep 1s
 
