@@ -294,6 +294,20 @@ rec doctor
 
 This checks 9 common issues including hook installation, storage permissions, and configuration validity.
 
+## Development
+
+```bash
+# Clone and setup
+git clone https://github.com/zeybek/rec.git
+cd rec
+./scripts/setup-hooks.sh   # install pre-commit hooks (fmt + clippy)
+
+# Build and test
+cargo build
+cargo test
+cargo clippy --all-targets --all-features
+```
+
 ## License
 
 Licensed under the [MIT License](LICENSE).
