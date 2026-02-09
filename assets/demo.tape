@@ -3,87 +3,93 @@
 
 Output assets/demo.gif
 
-Set Shell zsh
+Set Shell bash
 Set FontSize 14
 Set Width 900
 Set Height 500
 Set Padding 20
 Set Theme "Catppuccin Mocha"
+Set TypingSpeed 40ms
+
+# Title
+Type "# rec - Record, Replay, Export terminal sessions"
+Enter
+Sleep 1.5s
 
 # Start recording
-Type "# Start a new recording session"
-Sleep 500ms
-Enter
-Sleep 300ms
-
-Type "rec start --name deploy-script"
+Type "rec start my-session"
 Enter
 Sleep 1s
 
-# Run some commands
-Type "# Record your terminal commands..."
-Sleep 500ms
-Enter
-Sleep 300ms
-
-Type "echo 'Building project...'"
+# Simple commands that won't produce long output
+Type "echo 'Hello World'"
 Enter
 Sleep 800ms
 
-Type "cargo build --release"
-Sleep 500ms
-Enter
-Sleep 1s
-
-Type "echo 'Running tests...'"
+Type "whoami"
 Enter
 Sleep 800ms
 
-Type "cargo test"
-Sleep 500ms
+Type "date"
 Enter
-Sleep 1s
+Sleep 800ms
+
+Type "pwd"
+Enter
+Sleep 800ms
 
 # Stop recording
-Type "# Stop and save the session"
-Sleep 500ms
-Enter
-Sleep 300ms
-
 Type "rec stop"
+Enter
+Sleep 1.2s
+
+# List sessions
+Type "rec list"
+Enter
+Sleep 1.5s
+
+# Show session details
+Type "rec show my-session"
+Enter
+Sleep 2s
+
+# Export formats
+Type "# Export to various formats:"
+Enter
+Sleep 500ms
+
+Type "rec export my-session -f bash"
+Enter
+Sleep 2s
+
+Type "rec export my-session -f makefile"
+Enter
+Sleep 2s
+
+Type "rec export my-session -f github-action"
+Enter
+Sleep 2.5s
+
+# Replay
+Type "# Replay with safety checks:"
+Enter
+Sleep 500ms
+
+Type "rec replay my-session --dry-run"
+Enter
+Sleep 2s
+
+# Search
+Type "rec search echo"
+Enter
+Sleep 1.5s
+
+# Cleanup
+Type "rec delete my-session --force"
 Enter
 Sleep 1s
 
-# Show the session
-Type "# View your recorded session"
-Sleep 500ms
-Enter
-Sleep 300ms
-
-Type "rec show deploy-script"
-Enter
-Sleep 2s
-
-# Export to bash script
-Type "# Export to a bash script"
-Sleep 500ms
-Enter
-Sleep 300ms
-
-Type "rec export deploy-script --format bash"
-Enter
-Sleep 2s
-
-# Export to GitHub Actions
-Type "# Or export to GitHub Actions workflow"
-Sleep 500ms
-Enter
-Sleep 300ms
-
-Type "rec export deploy-script --format github-action"
-Enter
-Sleep 3s
-
-Type "# That's rec! Record once, export anywhere."
+# Final
+Type "# Install: cargo install rec-cli"
 Enter
 Sleep 2s
