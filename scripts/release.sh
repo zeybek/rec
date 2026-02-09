@@ -175,3 +175,13 @@ echo -e "${GREEN}========================================${NC}"
 echo ""
 echo "GitHub Actions will now build binaries and create the release."
 echo "Check: https://github.com/zeybek/rec/actions"
+echo ""
+
+# Publish to crates.io
+read -p "Publish to crates.io? [y/N] " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    echo -e "${YELLOW}Publishing to crates.io...${NC}"
+    cargo publish
+    echo -e "${GREEN}Published to crates.io!${NC}"
+fi

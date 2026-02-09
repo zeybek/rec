@@ -1,4 +1,5 @@
 [![CI](https://github.com/zeybek/rec/actions/workflows/ci.yml/badge.svg)](https://github.com/zeybek/rec/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/zeybek/rec/branch/main/graph/badge.svg)](https://codecov.io/gh/zeybek/rec)
 [![crates.io](https://img.shields.io/crates/v/rec-cli)](https://crates.io/crates/rec-cli)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![MSRV: 1.85](https://img.shields.io/badge/MSRV-1.85-orange)](https://www.rust-lang.org)
