@@ -29,6 +29,8 @@ pub struct ReplayEngine {
     skipped_count: usize,
     failed_count: usize,
     skipped_dangerous: usize,
+    /// Current working directory, updated when cd commands are executed
+    current_cwd: Option<std::path::PathBuf>,
 }
 
 impl ReplayEngine {
@@ -56,6 +58,7 @@ impl ReplayEngine {
             skipped_count: 0,
             failed_count: 0,
             skipped_dangerous: 0,
+            current_cwd: None,
         }
     }
 
@@ -91,6 +94,7 @@ impl ReplayEngine {
             skipped_count: 0,
             failed_count: 0,
             skipped_dangerous: 0,
+            current_cwd: None,
         }
     }
 
@@ -310,26 +314,33 @@ impl ReplayEngine {
                     eprintln!("$ {}", cmd.command);
                 }
 
-                // Determine cwd
+                // Determine cwd: --cwd uses original, otherwise use tracked current_cwd
                 let cwd: Option<&Path> = if self.options.use_original_cwd {
                     Some(cmd.cwd.as_path())
                 } else {
-                    None
+                    self.current_cwd.as_deref()
                 };
 
                 // Execute
-                let status = executor::execute_command(&cmd.command, cwd);
+                let result = executor::execute_command(&cmd.command, cwd);
                 self.executed_count += 1;
 
-                match status {
-                    Ok(exit_status) => {
-                        if exit_status.success() {
+                match result {
+                    Ok(exec_result) => {
+                        // Update current_cwd if this was a successful cd command
+                        if let Some(new_cwd) = exec_result.new_cwd {
+                            if !self.options.use_original_cwd {
+                                self.current_cwd = Some(new_cwd);
+                            }
+                        }
+
+                        if exec_result.status.success() {
                             break; // Command succeeded, move to next
                         }
 
                         // Command failed
                         self.failed_count += 1;
-                        let exit_code = exit_status.code();
+                        let exit_code = exec_result.status.code();
 
                         if prompt::is_interactive() && !self.aborted.load(Ordering::SeqCst) {
                             let action = prompt::prompt_error(&cmd.command, exit_code);

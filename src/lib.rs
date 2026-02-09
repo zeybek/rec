@@ -46,3 +46,6 @@ pub mod recording;
 pub mod replay;
 pub mod session;
 pub mod storage;
+
+#[cfg(feature = "tui")]
+pub mod tui;

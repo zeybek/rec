@@ -13,6 +13,9 @@ A CLI tool to record, replay, and export terminal sessions.
 
 ```bash
 cargo install rec-cli
+
+# With interactive TUI (optional)
+cargo install rec-cli --features tui
 ```
 
 Pre-built binaries are available for Linux (x86_64, aarch64) and macOS (x86_64, Apple Silicon) on the [releases page](https://github.com/zeybek/rec/releases/latest).
@@ -122,9 +125,42 @@ rec tags                          # list all tags with counts
 rec tags normalize                # normalize tag casing/format
 rec stats                         # aggregate recording statistics
 rec delete my-session             # delete a session
+rec delete --all                  # delete all sessions
+rec delete --all --force          # delete all without confirmation
 rec alias deploy deploy-server    # create a short alias
 rec status                        # show current recording status
 ```
+
+### Interactive TUI
+
+`rec` includes an optional terminal user interface for visual session management:
+
+```bash
+# Install with TUI support
+cargo install rec-cli --features tui
+
+# Launch the TUI
+rec ui
+```
+
+**Features:**
+- Browse and filter sessions with keyboard navigation
+- View session details and command history
+- Interactive replay with output display
+- Export wizard with format selection
+- Delete sessions with confirmation modal
+
+**Keybindings:**
+| Key | Action |
+|-----|--------|
+| `j/k` or `^/v` | Navigate up/down |
+| `Enter` | Select / Confirm |
+| `e` | Export selected session |
+| `r` | Replay selected session |
+| `d` | Delete selected session |
+| `/` | Filter sessions |
+| `?` | Toggle help panel |
+| `q` | Quit / Back |
 
 ### Import
 
@@ -204,7 +240,59 @@ Generate completions for your shell and add to your shell configuration.
 4. `rec stop` writes a footer line and releases the lock
 5. Sessions are stored as NDJSON at `~/.local/share/rec/sessions/` -- one JSON object per line, crash-recoverable by design
 
+## Troubleshooting
+
+### Commands not being recorded
+
+**Symptom:** `rec stop` shows "0 commands" even though you ran commands.
+
+**Cause:** Shell hooks are not loaded or `REC_RECORDING` environment variable is not set.
+
+**Solution:**
+1. Make sure you've added the init line to your shell rc file:
+   ```bash
+   # ~/.bashrc, ~/.zshrc, or ~/.config/fish/config.fish
+   eval "$(rec init bash)"   # or: zsh, fish
+   ```
+2. Restart your shell or run `source ~/.bashrc` (or equivalent)
+3. Verify hooks are loaded: the `rec` command should be a shell function, not just the binary
+   ```bash
+   type rec   # should show "rec is a function" not just the path
+   ```
+
+### Recording indicator not showing
+
+**Symptom:** No red `●` indicator in prompt during recording.
+
+**Solution:** The prompt indicator requires the shell hooks to be loaded. If you're using a custom prompt theme (oh-my-zsh, starship, etc.), it may override the prompt modification. You can:
+1. Manually add `$(__rec_prompt_indicator)` to your prompt
+2. Or set `REC_NO_PROMPT=1` to disable the indicator
+
+### Permission denied errors
+
+**Symptom:** Errors about unable to write to session files.
+
+**Solution:** Check permissions on the storage directory:
+```bash
+ls -la ~/.local/share/rec/
+# Should be owned by your user with write permissions
+```
+
+### Shell hooks interfering with other tools
+
+**Symptom:** Conflicts with other preexec/precmd hooks or shell plugins.
+
+**Solution:** Load `rec init` after other shell plugins in your rc file. The hooks are designed to coexist with other tools, but load order can matter.
+
+### Run diagnostics
+
+When in doubt, run the built-in diagnostic tool:
+```bash
+rec doctor
+```
+
+This checks 9 common issues including hook installation, storage permissions, and configuration validity.
+
 ## License
 
 Licensed under the [MIT License](LICENSE).
-

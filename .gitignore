@@ -1,4 +1,5 @@
 /target
+/docs
 *.swp
 *.swo
 *.orig
@@ -7,3 +8,10 @@
 .env
 .idea/
 .vscode/
+.opencode/
+
+# Coverage
+lcov.info
+coverage.json
+*.profraw
+*.profdata

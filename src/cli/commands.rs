@@ -108,12 +108,16 @@ pub enum Commands {
 
     /// Delete a session
     Delete {
-        /// Session name or ID
-        session: String,
+        /// Session name or ID (not required with --all)
+        session: Option<String>,
 
         /// Skip confirmation prompt
         #[arg(short, long)]
         force: bool,
+
+        /// Delete all sessions
+        #[arg(long)]
+        all: bool,
     },
 
     /// Run an interactive walkthrough of rec's features
@@ -121,6 +125,15 @@ pub enum Commands {
 
     /// Diagnose installation and configuration issues
     Doctor,
+
+    /// Copy a session with a new name
+    Copy {
+        /// Source session name or ID
+        source: String,
+
+        /// Name for the copy
+        name: String,
+    },
 
     /// Rename a session
     Rename {
@@ -296,6 +309,14 @@ Available formats:
         #[arg(value_enum)]
         shell: Shell,
     },
+
+    /// Launch interactive terminal UI (requires --features tui)
+    #[cfg(feature = "tui")]
+    Ui,
+
+    /// Launch interactive terminal UI (requires --features tui)
+    #[cfg(not(feature = "tui"))]
+    Ui,
 }
 
 /// Sub-actions for the `tags` command group.

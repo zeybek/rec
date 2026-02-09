@@ -2,6 +2,7 @@ pub mod alias;
 pub mod common;
 pub mod completions;
 pub mod config;
+pub mod copy;
 pub mod delete;
 pub mod demo;
 pub mod diff;
@@ -22,6 +23,7 @@ pub mod status;
 pub mod stop;
 pub mod tag;
 pub mod tags;
+pub mod ui;
 
 /// Shared context bundling all state needed by command handlers.
 ///

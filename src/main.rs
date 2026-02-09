@@ -102,9 +102,11 @@ fn main() -> ExitCode {
         Some(Commands::Delete {
             session: identifier,
             force,
-        }) => handlers::delete::handle_delete(&ctx, identifier, *force),
+            all,
+        }) => handlers::delete::handle_delete(&ctx, identifier.as_deref(), *force, *all),
         Some(Commands::Demo) => handlers::demo::handle_demo(&ctx),
         Some(Commands::Doctor) => handlers::demo::handle_doctor(&ctx),
+        Some(Commands::Copy { source, name }) => handlers::copy::handle_copy(&ctx, source, name),
         Some(Commands::Rename { old, new }) => handlers::rename::handle_rename(&ctx, old, new),
         Some(Commands::Edit {
             session: identifier,
@@ -167,6 +169,7 @@ fn main() -> ExitCode {
             remove.as_ref(),
         ),
         Some(Commands::Completions { shell }) => handlers::completions::handle_completions(*shell),
+        Some(Commands::Ui) => handlers::ui::handle_ui(&ctx),
         None => handlers::help::handle_none(),
     };
 

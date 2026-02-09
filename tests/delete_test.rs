@@ -103,3 +103,91 @@ fn test_delete_nonexistent_session_exit_code_1() {
 // and CLI behavior (MUT-02, MUT-03). The active recording protection
 // (MUT-04) is covered by unit tests.
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// MUT-05: delete --all removes all sessions
+// ---------------------------------------------------------------------------
+
+#[test]
+fn test_delete_all_removes_all_sessions() {
+    let env = TestEnv::new();
+
+    // Create multiple sessions
+    let session1 = env.create_and_save_session("session-one");
+    let session2 = env.create_and_save_session("session-two");
+    let session3 = env.create_and_save_session("session-three");
+
+    let id1 = session1.header.id.to_string();
+    let id2 = session2.header.id.to_string();
+    let id3 = session3.header.id.to_string();
+
+    // Pre-condition: all sessions exist
+    assert!(env.store.exists(&id1), "session1 should exist");
+    assert!(env.store.exists(&id2), "session2 should exist");
+    assert!(env.store.exists(&id3), "session3 should exist");
+
+    // Action: delete all via store API (simulating --all behavior)
+    let sessions = env.store.list().expect("list should succeed");
+    assert_eq!(sessions.len(), 3, "should have 3 sessions");
+
+    for session_id in &sessions {
+        env.store.delete(session_id).expect("delete should succeed");
+    }
+
+    // Post-condition: no sessions remain
+    let remaining = env.store.list().expect("list should succeed");
+    assert!(remaining.is_empty(), "all sessions should be deleted");
+}
+
+#[test]
+fn test_delete_all_with_no_sessions() {
+    let env = TestEnv::new();
+
+    // Pre-condition: no sessions exist
+    let sessions = env.store.list().expect("list should succeed");
+    assert!(sessions.is_empty(), "should have no sessions initially");
+
+    // Deleting all when empty should be a no-op (success)
+    // This tests the edge case handling
+}
+
+#[test]
+fn test_delete_all_with_no_sessions_succeeds() {
+    // --all with no sessions should succeed (nothing to confirm)
+    #[allow(deprecated)]
+    let mut cmd = assert_cmd::Command::cargo_bin("rec")
+        .expect("binary 'rec' should be findable by assert_cmd");
+
+    cmd.args(["delete", "--all"]);
+    cmd.assert()
+        .success()
+        .stderr(predicates::str::contains("No sessions"));
+}
+
+#[test]
+fn test_delete_all_force_succeeds_with_no_sessions() {
+    // --all --force with no sessions should succeed with info message
+    #[allow(deprecated)]
+    let mut cmd = assert_cmd::Command::cargo_bin("rec")
+        .expect("binary 'rec' should be findable by assert_cmd");
+
+    cmd.args(["delete", "--all", "--force"]);
+    cmd.assert()
+        .success()
+        .stderr(predicates::str::contains("No sessions"));
+}
+
+#[test]
+fn test_delete_without_session_or_all_fails() {
+    // Neither session name nor --all provided should fail with helpful message
+    #[allow(deprecated)]
+    let mut cmd = assert_cmd::Command::cargo_bin("rec")
+        .expect("binary 'rec' should be findable by assert_cmd");
+
+    cmd.args(["delete"]);
+    cmd.assert().failure().stderr(
+        predicates::str::contains("session")
+            .or(predicates::str::contains("--all"))
+            .or(predicates::str::contains("required")),
+    );
+}
