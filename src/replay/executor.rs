@@ -218,7 +218,9 @@ mod tests {
         let result = execute_command("cd /tmp", None).unwrap();
         assert!(result.status.success());
         assert!(result.new_cwd.is_some());
-        assert_eq!(result.new_cwd.unwrap(), PathBuf::from("/tmp"));
+        // On macOS, /tmp is a symlink to /private/tmp, so we canonicalize for comparison
+        let expected = std::fs::canonicalize("/tmp").unwrap_or_else(|_| PathBuf::from("/tmp"));
+        assert_eq!(result.new_cwd.unwrap(), expected);
     }
 
     #[test]
